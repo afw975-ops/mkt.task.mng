@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> MKT · Marketing Task Management</title>
+    <title>MarketFlow · Marketing Task Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,6 +64,7 @@
         .cal-cell.is-today { border-color: #2563EB; }
         .cal-cell.is-selected { background: rgba(37,99,235,0.10); border-color: #2563EB; }
         .cal-cell.is-muted { opacity: 0.45; }
+        body.role-user .admin-only { display: none !important; }
         .cal-chip { font-size: 0.62rem; padding: 1px 6px; border-radius: 6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
         .qday { min-height: 30px; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 6px; cursor: pointer; color: #475569; transition: background .12s; }
         .qday:hover { background: rgba(37,99,235,0.08); }
@@ -78,6 +79,44 @@
 <!-- TOAST NOTIFICATION -->
 <div id="toast" class="toast"></div>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-8">
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white mb-3"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+            <h1 class="text-lg font-semibold">MarketFlow</h1>
+            <p class="text-sm text-slate-500">Sign in to continue</p>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="field-label">Username</label>
+                <input id="loginUsername" type="text" autocomplete="username" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+            </div>
+            <div>
+                <label class="field-label">Password</label>
+                <input id="loginPassword" type="password" autocomplete="current-password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+            </div>
+            <p id="loginError" class="text-sm text-red-500 hidden"></p>
+            <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-medium transition">Sign in</button>
+        </div>
+    </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div id="changePwModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Change password</h3>
+        <div class="space-y-3">
+            <div><label class="field-label">Current password</label><input id="cpOld" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 outline-none"></div>
+            <div><label class="field-label">New password</label><input id="cpNew" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 outline-none"></div>
+            <div class="flex gap-2 justify-end pt-1">
+                <button id="cpCancel" class="px-4 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-700">Cancel</button>
+                <button id="cpSave" class="px-4 py-2 rounded-xl text-sm bg-blue-600 hover:bg-blue-700 text-white">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- BULK ACTION BAR -->
 <div id="bulkActionBar" class="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-sm flex-wrap justify-center max-w-[92vw]">
     <span id="bulkCount" class="font-medium whitespace-nowrap">0 selected</span>
@@ -88,19 +127,19 @@
         <option value="On Hold">On Hold</option><option value="Overdue">Overdue</option>
     </select>
     <button id="bulkApplyStatusBtn" class="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Apply</button>
-    <button id="bulkDeleteBtn" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Delete</button>
+    <button id="bulkDeleteBtn" class="admin-only bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Delete</button>
     <button id="bulkClearBtn" class="text-slate-300 hover:text-white px-2 text-xs">Clear</button>
 </div>
 
 <!-- APP WRAPPER -->
-<div id="app" class="flex h-screen overflow-hidden">
+<div id="app" class="h-screen overflow-hidden hidden">
 
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar-expanded flex-shrink-0 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/50 flex flex-col transition-all duration-300 h-screen sticky top-0">
         <div class="flex items-center justify-between px-5 h-16 border-b border-slate-200/50 dark:border-slate-700/50">
             <div class="flex items-center gap-2">
                 <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">📊</span>
-                <span class="text-lg font-semibold tracking-tight logo-text"> MKT</span>
+                <span class="text-lg font-semibold tracking-tight logo-text">MarketFlow</span>
             </div>
             <button id="collapseSidebar" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -134,7 +173,20 @@
             <div class="flex items-center gap-3">
                 <button id="notificationBtn" class="relative p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition"><i data-lucide="bell" class="w-5 h-5"></i><span id="notificationDot" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span></button>
                 <button id="themeToggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition"><i data-lucide="moon" class="w-5 h-5"></i></button>
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">SH</div>
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                        <span id="userAvatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">?</span>
+                        <span class="hidden sm:block text-left leading-tight">
+                            <span id="userNameLabel" class="block text-xs font-semibold">—</span>
+                            <span id="userRoleLabel" class="block text-[10px] text-slate-400">—</span>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200/60 dark:border-slate-700/60 py-1 z-30">
+                        <button id="changePwBtn" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"><i data-lucide="key-round" class="w-4 h-4"></i> Change password</button>
+                        <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign out</button>
+                    </div>
+                </div>
                 <button id="openCreateModalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1"><i data-lucide="plus" class="w-4 h-4"></i> New Task</button>
             </div>
         </header>
@@ -366,7 +418,7 @@
                     </div>
                 </div>
                 <!-- CATEGORY & BRAND MANAGER -->
-                <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 mt-6">
+                <div class="admin-only bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 mt-6">
                     <h3 class="text-xl font-semibold mb-1">Categories &amp; Brands</h3>
                     <p class="text-sm text-slate-500 mb-5">Set these up first. When you create a task, Category and Brand are chosen from these lists.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -394,17 +446,43 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- USER MANAGEMENT (admin only) -->
+                <div id="adminUsersCard" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 mt-6 hidden">
+                    <h3 class="text-xl font-semibold mb-1">Users</h3>
+                    <p class="text-sm text-slate-500 mb-5">Add team members, set their role, reset passwords, or disable access.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-4">
+                        <input id="nuUsername" type="text" placeholder="Username" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm">
+                        <input id="nuName" type="text" placeholder="Full name" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm">
+                        <input id="nuPassword" type="text" placeholder="Password" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm">
+                        <div class="flex gap-2">
+                            <select id="nuRole" class="flex-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl px-3 py-2 border-0 outline-none text-sm"><option value="user">User</option><option value="admin">Admin</option></select>
+                            <button id="addUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm">Add</button>
+                        </div>
+                    </div>
+                    <div id="usersList" class="overflow-x-auto"></div>
+                </div>
+
+                <!-- ACTIVITY LOG (admin only) -->
+                <div id="adminActivityCard" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 mt-6 hidden">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xl font-semibold">Activity Log</h3>
+                        <button id="refreshActivityBtn" class="text-xs text-blue-600 hover:underline flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh</button>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">Who did what, most recent first.</p>
+                    <div id="activityList" class="max-h-96 overflow-y-auto"></div>
+                </div>
             </div>
 
             <!-- PROFILE -->
             <div id="section-profile" class="p-6 md:p-8 hidden">
                 <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40">
                     <div class="flex items-center gap-6 mb-6">
-                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-semibold">SH</div>
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-semibold">JD</div>
                         <div>
-                            <h3 class="text-2xl font-semibold">SENGHONG</h3>
+                            <h3 class="text-2xl font-semibold">John Doe</h3>
                             <p class="text-slate-500 dark:text-slate-400">Marketing Manager</p>
-                            <p class="text-sm text-slate-400">nomail@company.com</p>
+                            <p class="text-sm text-slate-400">john.doe@company.com</p>
                         </div>
                     </div>
                     <div class="grid md:grid-cols-2 gap-4">
@@ -549,7 +627,7 @@
         </div>
         <div class="px-6 pb-6 pt-4 flex justify-end gap-2 border-t border-slate-200/40 dark:border-slate-700/40">
             <button id="detailEditBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm">Edit</button>
-            <button id="detailDeleteBtn" class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-5 py-2 rounded-xl text-sm">Delete</button>
+            <button id="detailDeleteBtn" class="admin-only bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-5 py-2 rounded-xl text-sm">Delete</button>
             <button id="closeDetailBtn" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 px-5 py-2 rounded-xl text-sm">Close</button>
         </div>
     </div>
@@ -620,7 +698,18 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbyN8ECS1_70L7Pqkrrv8btFME26gdPrqjJRGeI1Cd4bUSkSdjJ3C9nEK-2EjID-5tpAww/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxj_C288ABibyVs7A7QMnHDxLLdUUX0kSaT8uzagHC120ZJUO2u_-D_p3pfd2EQUs41Sg/exec';
+    // ===================== AUTH STATE =====================
+    let authToken = localStorage.getItem('mf_token') || '';
+    let currentUser = null;
+    try { currentUser = JSON.parse(localStorage.getItem('mf_user') || 'null'); } catch (e) { currentUser = null; }
+    function authParam() { return authToken ? '&token=' + encodeURIComponent(authToken) : ''; }
+    function isAdmin() { return currentUser && currentUser.role === 'admin'; }
+    // Returns true if the response says we're logged out; also shows the login screen.
+    function checkAuth(data) {
+        if (data && data.status === 'unauthorized') { doLogout(true); return true; }
+        return false;
+    }
 
     // ===================== STATE =====================
     let tasks = [];
@@ -708,8 +797,9 @@
     async function fetchLists() {
         if (!GS_BASE_URL) return;
         try {
-            const res = await fetch(GS_BASE_URL + '?action=getLists');
+            const res = await fetch(GS_BASE_URL + '?action=getLists' + authParam());
             const data = await res.json();
+            if (checkAuth(data)) return;
             if (data.status === 'success' && data.data) {
                 managedCategories = (data.data.categories || []).filter(Boolean);
                 managedBrands = (data.data.brands || []).filter(Boolean);
@@ -918,9 +1008,10 @@
     // ===================== API CALLS =====================
     async function fetchTasks() {
         try {
-            const res = await fetch(GS_BASE_URL + '?action=getTasks');
+            const res = await fetch(GS_BASE_URL + '?action=getTasks' + authParam());
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
+            if (checkAuth(data)) return;
             if (data.status === 'success') {
                 tasks = data.data || [];
                 const liveIds = new Set(tasks.map(t => t.id.toString()));
@@ -952,9 +1043,10 @@
             const res = await fetch(GS_BASE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'createTask', task })
+                body: JSON.stringify({ action: 'createTask', task, token: authToken })
             });
             const data = await res.json();
+            if (checkAuth(data)) return false;
             if (data.status === 'success') {
                 showToast('✅ Task created: ' + (data.id || task.id || ''), 'success');
                 await fetchTasks();
@@ -973,9 +1065,10 @@
             const res = await fetch(GS_BASE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'updateTask', id, task: taskData })
+                body: JSON.stringify({ action: 'updateTask', id, task: taskData, token: authToken })
             });
             const data = await res.json();
+            if (checkAuth(data)) return false;
             if (data.status === 'success') {
                 showToast('✅ Task updated successfully!', 'success');
                 await fetchTasks();
@@ -991,8 +1084,9 @@
 
     async function deleteTaskById(id) {
         try {
-            const res = await fetch(GS_BASE_URL + '?action=deleteTask&id=' + encodeURIComponent(id));
+            const res = await fetch(GS_BASE_URL + '?action=deleteTask&id=' + encodeURIComponent(id) + authParam());
             const data = await res.json();
+            if (checkAuth(data)) return false;
             if (data.status === 'success') {
                 showToast('✅ Task deleted successfully!', 'success');
                 await fetchTasks();
@@ -1010,14 +1104,18 @@
         const res = await fetch(GS_BASE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(Object.assign({ action }, payload))
+            body: JSON.stringify(Object.assign({ action, token: authToken }, payload))
         });
-        return res.json();
+        const data = await res.json();
+        if (checkAuth(data)) return { status: 'unauthorized' };
+        return data;
     }
 
     async function fetchTaskDetail(id) {
-        const res = await fetch(GS_BASE_URL + '?action=getTaskDetail&id=' + encodeURIComponent(id));
-        return res.json();
+        const res = await fetch(GS_BASE_URL + '?action=getTaskDetail&id=' + encodeURIComponent(id) + authParam());
+        const data = await res.json();
+        checkAuth(data);
+        return data;
     }
 
     async function addChecklistItem(taskId, text) {
@@ -1240,7 +1338,7 @@
                 '<td class="px-4 py-3 text-right flex gap-2 justify-end" onclick="event.stopPropagation()">' +
                 '<button onclick="viewTask(\'' + t.id + '\')" class="text-slate-400 hover:text-blue-500"><i data-lucide="eye" class="w-4 h-4"></i></button>' +
                 '<button onclick="openEditModal(\'' + t.id + '\')" class="text-slate-400 hover:text-blue-500"><i data-lucide="edit" class="w-4 h-4"></i></button>' +
-                '<button onclick="deleteTask(\'' + t.id + '\')" class="text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
+                '<button onclick="deleteTask(\'' + t.id + '\')" class="admin-only text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
                 '</td></tr>';
         });
         tableBody.innerHTML = html;
@@ -2047,10 +2145,151 @@
         });
     })();
 
+    // ===================== AUTH / LOGIN =====================
+    function showLogin() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginScreen').classList.add('flex');
+        const app = document.getElementById('app'); app.classList.add('hidden'); app.classList.remove('flex');
+        setTimeout(() => { const u = document.getElementById('loginUsername'); if (u) u.focus(); }, 50);
+    }
+    function hideLogin() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('flex');
+        const app = document.getElementById('app'); app.classList.remove('hidden'); app.classList.add('flex');
+    }
+    function applyUserToUI() {
+        if (!currentUser) return;
+        document.getElementById('userNameLabel').textContent = currentUser.name || currentUser.username;
+        document.getElementById('userRoleLabel').textContent = currentUser.role === 'admin' ? 'Admin' : 'User';
+        document.getElementById('userAvatar').textContent = initials(currentUser.name || currentUser.username);
+        document.getElementById('adminUsersCard').classList.toggle('hidden', !isAdmin());
+        document.getElementById('adminActivityCard').classList.toggle('hidden', !isAdmin());
+        document.body.classList.toggle('role-user', !isAdmin());
+    }
+    async function doLogin() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errEl = document.getElementById('loginError');
+        errEl.classList.add('hidden');
+        if (!username || !password) { errEl.textContent = 'Enter username and password'; errEl.classList.remove('hidden'); return; }
+        try {
+            const res = await fetch(GS_BASE_URL, {
+                method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'login', username, password })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                authToken = data.token; currentUser = data.user;
+                localStorage.setItem('mf_token', authToken);
+                localStorage.setItem('mf_user', JSON.stringify(currentUser));
+                document.getElementById('loginPassword').value = '';
+                hideLogin(); applyUserToUI(); startApp();
+            } else {
+                errEl.textContent = data.message || 'Login failed'; errEl.classList.remove('hidden');
+            }
+        } catch (e) { errEl.textContent = 'Cannot reach server'; errEl.classList.remove('hidden'); }
+    }
+    function doLogout(silent) {
+        if (!silent && authToken) { try { postAction('logout', {}); } catch (e) {} }
+        authToken = ''; currentUser = null;
+        localStorage.removeItem('mf_token'); localStorage.removeItem('mf_user');
+        showLogin();
+    }
+    function startApp() {
+        applyUserToUI();
+        fetchLists();
+        fetchTasks();
+        if (isAdmin()) { renderUsers(); renderActivity(); }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', doLogin);
+    document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
+
+    // user menu
+    document.getElementById('userMenuBtn').addEventListener('click', () => document.getElementById('userMenu').classList.toggle('hidden'));
+    document.addEventListener('click', e => { if (!e.target.closest('#userMenuBtn') && !e.target.closest('#userMenu')) document.getElementById('userMenu').classList.add('hidden'); });
+    document.getElementById('logoutBtn').addEventListener('click', () => doLogout(false));
+    document.getElementById('changePwBtn').addEventListener('click', () => { document.getElementById('userMenu').classList.add('hidden'); document.getElementById('changePwModal').classList.remove('hidden'); document.getElementById('changePwModal').classList.add('flex'); });
+    document.getElementById('cpCancel').addEventListener('click', () => { document.getElementById('changePwModal').classList.add('hidden'); document.getElementById('changePwModal').classList.remove('flex'); });
+    document.getElementById('cpSave').addEventListener('click', async () => {
+        const oldPw = document.getElementById('cpOld').value, newPw = document.getElementById('cpNew').value;
+        const data = await postAction('changePassword', { oldPassword: oldPw, newPassword: newPw });
+        if (data.status === 'success') { showToast('✅ Password changed', 'success'); document.getElementById('cpOld').value = ''; document.getElementById('cpNew').value = ''; document.getElementById('cpCancel').click(); }
+        else showToast('❌ ' + (data.message || 'Failed'), 'error');
+    });
+
+    // ===================== ADMIN: USERS =====================
+    async function renderUsers() {
+        if (!isAdmin()) return;
+        const res = await fetch(GS_BASE_URL + '?action=listUsers' + authParam());
+        const data = await res.json();
+        if (checkAuth(data) || data.status !== 'success') return;
+        const el = document.getElementById('usersList');
+        el.innerHTML = '<table class="w-full text-sm"><thead><tr class="text-left text-slate-400 text-xs border-b border-slate-200/50 dark:border-slate-700/50">' +
+            '<th class="py-2">Username</th><th>Name</th><th>Role</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>' +
+            data.data.map(u => {
+                const badge = u.active ? '<span class="text-green-600">Active</span>' : '<span class="text-slate-400">Disabled</span>';
+                return '<tr class="border-b border-slate-100 dark:border-slate-700/40">' +
+                    '<td class="py-2 font-medium">' + escapeHtml(u.username) + '</td>' +
+                    '<td>' + escapeHtml(u.name || '') + '</td>' +
+                    '<td>' + escapeHtml(u.role || 'user') + '</td>' +
+                    '<td>' + badge + '</td>' +
+                    '<td class="text-right whitespace-nowrap">' +
+                        '<button class="usr-reset text-blue-600 hover:underline text-xs mr-3" data-u="' + escapeHtml(u.username) + '">Reset pw</button>' +
+                        '<button class="usr-toggle text-xs ' + (u.active ? 'text-red-600' : 'text-green-600') + ' hover:underline" data-u="' + escapeHtml(u.username) + '" data-active="' + (u.active ? '1' : '0') + '">' + (u.active ? 'Disable' : 'Enable') + '</button>' +
+                    '</td></tr>';
+            }).join('') + '</tbody></table>';
+    }
+    document.getElementById('addUserBtn').addEventListener('click', async () => {
+        const username = document.getElementById('nuUsername').value.trim();
+        const name = document.getElementById('nuName').value.trim();
+        const password = document.getElementById('nuPassword').value;
+        const role = document.getElementById('nuRole').value;
+        if (!username || !password) { showToast('❌ Username and password required', 'error'); return; }
+        const data = await postAction('addUser', { username, name, password, role });
+        if (data.status === 'success') {
+            showToast('✅ User added', 'success');
+            document.getElementById('nuUsername').value = ''; document.getElementById('nuName').value = ''; document.getElementById('nuPassword').value = '';
+            renderUsers();
+        } else showToast('❌ ' + (data.message || 'Failed'), 'error');
+    });
+    document.addEventListener('click', async e => {
+        const reset = e.target.closest('.usr-reset');
+        if (reset) {
+            const pw = prompt('New password for "' + reset.dataset.u + '":');
+            if (pw) { const d = await postAction('resetPassword', { username: reset.dataset.u, password: pw }); showToast(d.status === 'success' ? '✅ Password reset' : '❌ ' + d.message, d.status === 'success' ? 'success' : 'error'); }
+            return;
+        }
+        const tog = e.target.closest('.usr-toggle');
+        if (tog) {
+            const d = await postAction('setUserActive', { username: tog.dataset.u, active: tog.dataset.active !== '1' });
+            if (d.status === 'success') renderUsers(); else showToast('❌ ' + d.message, 'error');
+        }
+    });
+
+    // ===================== ADMIN: ACTIVITY =====================
+    async function renderActivity() {
+        if (!isAdmin()) return;
+        const res = await fetch(GS_BASE_URL + '?action=getActivity&limit=200' + authParam());
+        const data = await res.json();
+        if (checkAuth(data) || data.status !== 'success') return;
+        const el = document.getElementById('activityList');
+        if (!data.data.length) { el.innerHTML = '<p class="text-sm text-slate-400">No activity yet.</p>'; return; }
+        el.innerHTML = '<table class="w-full text-sm"><thead><tr class="text-left text-slate-400 text-xs border-b border-slate-200/50 dark:border-slate-700/50">' +
+            '<th class="py-2">When</th><th>User</th><th>Action</th><th>Detail</th></tr></thead><tbody>' +
+            data.data.map(a => '<tr class="border-b border-slate-100 dark:border-slate-700/40">' +
+                '<td class="py-2 whitespace-nowrap text-slate-400 font-mono text-xs">' + escapeHtml(formatDateTime(a.at)) + '</td>' +
+                '<td class="font-medium">' + escapeHtml(a.username || '') + '</td>' +
+                '<td>' + escapeHtml((a.action || '').replace(/_/g, ' ')) + '</td>' +
+                '<td class="text-slate-500">' + escapeHtml(a.detail || '') + '</td></tr>').join('') + '</tbody></table>';
+    }
+    document.getElementById('refreshActivityBtn').addEventListener('click', renderActivity);
+
     // ===================== INIT =====================
     lucide.createIcons();
-    fetchLists();
-    fetchTasks();
+    if (authToken && currentUser) { hideLogin(); startApp(); }
+    else { showLogin(); }
 </script>
 </body>
 </html>
