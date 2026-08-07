@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketFlow · Marketing Task Management</title>
+    <title>TASKMKT · Marketing Task Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,7 +84,7 @@
     <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-8">
         <div class="flex flex-col items-center mb-6">
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white mb-3"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
-            <h1 class="text-lg font-semibold">MarketFlow</h1>
+            <h1 class="text-lg font-semibold">TASKMKT</h1>
             <p class="text-sm text-slate-500">Sign in to continue</p>
         </div>
         <div class="space-y-3">
@@ -139,7 +139,7 @@
         <div class="flex items-center justify-between px-5 h-16 border-b border-slate-200/50 dark:border-slate-700/50">
             <div class="flex items-center gap-2">
                 <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">📊</span>
-                <span class="text-lg font-semibold tracking-tight logo-text">MarketFlow</span>
+                <span class="text-lg font-semibold tracking-tight logo-text">TASKMKT</span>
             </div>
             <button id="collapseSidebar" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -478,11 +478,10 @@
             <div id="section-profile" class="p-6 md:p-8 hidden">
                 <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40">
                     <div class="flex items-center gap-6 mb-6">
-                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-semibold">JD</div>
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-semibold">SH</div>
                         <div>
-                            <h3 class="text-2xl font-semibold">John Doe</h3>
+                            <h3 class="text-2xl font-semibold">SENHONG</h3>
                             <p class="text-slate-500 dark:text-slate-400">Marketing Manager</p>
-                            <p class="text-sm text-slate-400">john.doe@company.com</p>
                         </div>
                     </div>
                     <div class="grid md:grid-cols-2 gap-4">
@@ -698,7 +697,7 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxj_C288ABibyVs7A7QMnHDxLLdUUX0kSaT8uzagHC120ZJUO2u_-D_p3pfd2EQUs41Sg/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbwzhHy1mHP-otkUX-06uG6MLkbTuFy3l8RKfWW9EUq_QmTeDOVxqdJZjXGUYqG_MO_7Xw/exec';
     // ===================== AUTH STATE =====================
     let authToken = localStorage.getItem('mf_token') || '';
     let currentUser = null;
@@ -2230,16 +2229,20 @@
             '<th class="py-2">Username</th><th>Name</th><th>Role</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>' +
             data.data.map(u => {
                 const badge = u.active ? '<span class="text-green-600">Active</span>' : '<span class="text-slate-400">Disabled</span>';
+                const roleSel = '<select class="usr-role bg-slate-100 dark:bg-slate-700/60 rounded-lg px-2 py-1 text-xs border-0 outline-none" data-u="' + escapeHtml(u.username) + '">' +
+                    '<option value="user"' + (u.role !== 'admin' ? ' selected' : '') + '>User</option>' +
+                    '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin</option></select>';
                 return '<tr class="border-b border-slate-100 dark:border-slate-700/40">' +
                     '<td class="py-2 font-medium">' + escapeHtml(u.username) + '</td>' +
-                    '<td>' + escapeHtml(u.name || '') + '</td>' +
-                    '<td>' + escapeHtml(u.role || 'user') + '</td>' +
+                    '<td><span>' + escapeHtml(u.name || '') + '</span> <button class="usr-editname text-slate-400 hover:text-blue-500 ml-1 align-middle" data-u="' + escapeHtml(u.username) + '" data-name="' + escapeHtml(u.name || '') + '" title="Edit name"><i data-lucide="pencil" class="w-3 h-3"></i></button></td>' +
+                    '<td>' + roleSel + '</td>' +
                     '<td>' + badge + '</td>' +
                     '<td class="text-right whitespace-nowrap">' +
                         '<button class="usr-reset text-blue-600 hover:underline text-xs mr-3" data-u="' + escapeHtml(u.username) + '">Reset pw</button>' +
                         '<button class="usr-toggle text-xs ' + (u.active ? 'text-red-600' : 'text-green-600') + ' hover:underline" data-u="' + escapeHtml(u.username) + '" data-active="' + (u.active ? '1' : '0') + '">' + (u.active ? 'Disable' : 'Enable') + '</button>' +
                     '</td></tr>';
             }).join('') + '</tbody></table>';
+        if (window.lucide) lucide.createIcons();
     }
     document.getElementById('addUserBtn').addEventListener('click', async () => {
         const username = document.getElementById('nuUsername').value.trim();
@@ -2265,7 +2268,24 @@
         if (tog) {
             const d = await postAction('setUserActive', { username: tog.dataset.u, active: tog.dataset.active !== '1' });
             if (d.status === 'success') renderUsers(); else showToast('❌ ' + d.message, 'error');
+            return;
         }
+        const en = e.target.closest('.usr-editname');
+        if (en) {
+            const nm = prompt('New name for "' + en.dataset.u + '":', en.dataset.name || '');
+            if (nm !== null && nm.trim() !== '') {
+                const d = await postAction('updateUser', { username: en.dataset.u, name: nm.trim() });
+                if (d.status === 'success') { showToast('✅ Name updated', 'success'); renderUsers(); }
+                else showToast('❌ ' + (d.message || 'Failed'), 'error');
+            }
+        }
+    });
+    document.addEventListener('change', async e => {
+        const rs = e.target.closest && e.target.closest('.usr-role');
+        if (!rs) return;
+        const d = await postAction('updateUser', { username: rs.dataset.u, role: rs.value });
+        if (d.status === 'success') { showToast('✅ Role updated', 'success'); renderUsers(); }
+        else { showToast('❌ ' + (d.message || 'Failed'), 'error'); renderUsers(); }
     });
 
     // ===================== ADMIN: ACTIVITY =====================
