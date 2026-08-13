@@ -188,6 +188,10 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
+                <div id="adminScopeToggle" class="hidden items-center rounded-xl bg-slate-100 dark:bg-slate-700 p-0.5 text-xs">
+                    <button class="scope-btn px-3 py-1.5 rounded-lg" data-scope="all">All tasks</button>
+                    <button class="scope-btn px-3 py-1.5 rounded-lg" data-scope="mine">My tasks</button>
+                </div>
                 <button id="notificationBtn" class="relative p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition"><i data-lucide="bell" class="w-5 h-5"></i><span id="notificationDot" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span></button>
                 <button id="themeToggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition"><i data-lucide="moon" class="w-5 h-5"></i></button>
                 <div class="relative">
@@ -346,10 +350,16 @@
                                 <button id="calToday" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700">Today</button>
                                 <h3 class="font-semibold text-base ml-2" id="calPeriodLabel">-</h3>
                             </div>
-                            <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-700 p-0.5 text-xs">
-                                <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="week">Week</button>
-                                <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="month">Month</button>
-                                <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="quarter">Quarter</button>
+                            <div class="flex items-center gap-2">
+                                <div id="calLayoutToggle" class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-700 p-0.5 text-xs">
+                                    <button class="cal-layout-btn px-2.5 py-1.5 rounded-lg" data-layout="grid" title="Grid view"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
+                                    <button class="cal-layout-btn px-2.5 py-1.5 rounded-lg" data-layout="list" title="List view"><i data-lucide="list" class="w-4 h-4"></i></button>
+                                </div>
+                                <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-700 p-0.5 text-xs">
+                                    <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="week">Week</button>
+                                    <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="month">Month</button>
+                                    <button class="cal-view-btn px-3 py-1.5 rounded-lg" data-view="quarter">Quarter</button>
+                                </div>
                             </div>
                         </div>
                         <div id="calBody"></div>
@@ -473,7 +483,14 @@
                 <!-- ROLE PERMISSIONS (admin only) -->
                 <div id="adminPermsCard" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 mt-6 hidden">
                     <h3 class="text-xl font-semibold mb-1">Role Permissions</h3>
-                    <p class="text-sm text-slate-500 mb-5">Choose what a <span class="font-medium">User</span> is allowed to do. Admins always have full access.</p>
+                    <p class="text-sm text-slate-500 mb-4">Set what each level can do. <span class="font-medium">Admin</span> always has full access; <span class="font-medium">Manager</span> also sees every task.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-sm font-medium">Editing level:</span>
+                        <div id="permRoleToggle" class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-700 p-0.5 text-xs">
+                            <button class="permrole-btn px-3 py-1.5 rounded-lg" data-role="user">User</button>
+                            <button class="permrole-btn px-3 py-1.5 rounded-lg" data-role="manager">Manager</button>
+                        </div>
+                    </div>
                     <div class="divide-y divide-slate-100 dark:divide-slate-700/40">
                         <div class="flex items-center justify-between py-3">
                             <div><div class="font-medium text-sm">Create tasks</div><div class="text-xs text-slate-400">Add new tasks</div></div>
@@ -507,7 +524,7 @@
                         <input id="nuName" type="text" placeholder="Full name" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm">
                         <input id="nuPassword" type="text" placeholder="Password" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm">
                         <div class="flex gap-2">
-                            <select id="nuRole" class="flex-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl px-3 py-2 border-0 outline-none text-sm"><option value="user">User</option><option value="admin">Admin</option></select>
+                            <select id="nuRole" class="flex-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl px-3 py-2 border-0 outline-none text-sm"><option value="user">User</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
                             <button id="addUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm">Add</button>
                         </div>
                     </div>
@@ -530,9 +547,13 @@
                 <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40">
                     <div class="flex items-center gap-6 mb-6">
                         <div id="profileAvatar" class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-semibold">SH</div>
-                        <div>
+                        <div class="flex-1">
                             <h3 id="profileName" class="text-2xl font-semibold">SENHONG</h3>
                             <p id="profileRole" class="text-slate-500 dark:text-slate-400">Marketing Manager</p>
+                        </div>
+                        <div id="profileUserWrap" class="hidden">
+                            <label class="field-label">View summary for</label>
+                            <select id="profileUserSelect" class="bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2 border-0 outline-none text-sm"></select>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -758,11 +779,12 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxIRdsOpcZT9NZuvy2KnBoJAa46Y1Ny_NJsOsJ9_aqJhXpowoVsXCyuflznvOGpjkIXLQ/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbykWkbSoeD3XRPJVIR6Sg7FoxCidD4K-wUfQXDWPUrIgn4Ls6b_fsUgxF41vHNX4L_GnA/exec';
     // ===================== AUTH STATE =====================
     let authToken = localStorage.getItem('mf_token') || '';
     let currentUser = null;
     let perms = { createTask: true, editTask: true, deleteTask: false, manageLists: false };
+    let allPerms = { user: {}, manager: {} };
     let assigneeNames = [];
     try { currentUser = JSON.parse(localStorage.getItem('mf_user') || 'null'); } catch (e) { currentUser = null; }
     function authParam() { return authToken ? '&token=' + encodeURIComponent(authToken) : ''; }
@@ -791,6 +813,9 @@
     let managedBrands = [];
     // Calendar state
     let calView = 'month';
+    let calLayout = 'grid';
+    let adminScopeAll = true;   // admin: see all tasks (true) or only mine (false)
+    let profileUser = null;     // admin: which user's summary to show on Profile
     let calCursor = new Date();       // period being viewed
     let calSelected = new Date();     // day whose task list is shown
 
@@ -1027,6 +1052,32 @@
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const MONTHS_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Cambodian public holidays. Fixed-date ones use 'MM-DD' (repeat every year).
+    // Lunar holidays (Meak Bochea, Visak Bochea, Pchum Ben, Royal Ploughing) move each
+    // year — add them as 'YYYY-MM-DD' below when the official dates are announced.
+    const CAMBODIA_HOLIDAYS = {
+        '01-01': 'International New Year',
+        '01-07': 'Victory over Genocide Day',
+        '03-08': "Int'l Women's Day",
+        '04-14': 'Khmer New Year',
+        '04-15': 'Khmer New Year',
+        '04-16': 'Khmer New Year',
+        '05-01': 'Labour Day',
+        '05-14': "King's Birthday",
+        '05-20': 'Day of Remembrance',
+        '06-18': "Queen Mother's Birthday",
+        '09-24': 'Constitution Day',
+        '10-15': 'King Father Commemoration',
+        '10-29': "King's Coronation Day",
+        '11-09': 'Independence Day'
+        // e.g. add lunar ones like: '2026-05-01': 'Visak Bochea',
+    };
+    function holidayName(date) {
+        const y = date.getFullYear();
+        const mm = ('0' + (date.getMonth() + 1)).slice(-2);
+        const dd = ('0' + date.getDate()).slice(-2);
+        return CAMBODIA_HOLIDAYS[y + '-' + mm + '-' + dd] || CAMBODIA_HOLIDAYS[mm + '-' + dd] || '';
+    }
 
     function parseYMD(s) {
         if (!s) return null;
@@ -1256,6 +1307,11 @@
         const query = searchInput.value.toLowerCase().trim();
         const terms = query ? query.split(/\s+/) : [];
         filteredTasks = tasks.filter(t => {
+            // admin "Mine" scope: limit to the admin's own assigned tasks
+            if (isAdmin() && !adminScopeAll) {
+                const myName = (currentUser.name || currentUser.username || '').toLowerCase();
+                if ((t.assignee || '').toLowerCase() !== myName) return false;
+            }
             // archived tasks live in the Archive view, not the active list
             // (unless the user explicitly filters by a Completed/Confirmed status)
             if (isArchived(t) && filterState.status !== t.status) return false;
@@ -1495,6 +1551,16 @@
     document.querySelectorAll('.cal-view-btn').forEach(btn => {
         btn.addEventListener('click', () => { calView = btn.dataset.view; renderCalendar(); });
     });
+    document.querySelectorAll('.cal-layout-btn').forEach(btn => {
+        btn.addEventListener('click', () => { calLayout = btn.dataset.layout; renderCalendar(); });
+    });
+    document.querySelectorAll('.scope-btn').forEach(btn => {
+        btn.addEventListener('click', () => { adminScopeAll = (btn.dataset.scope === 'all'); updateScopeButtons(); applyFilters(); renderAll(); });
+    });
+    document.addEventListener('change', e => {
+        const sel = e.target.closest && e.target.closest('#profileUserSelect');
+        if (sel) { profileUser = sel.value; renderProfile(); }
+    });
     document.getElementById('calPrev').addEventListener('click', () => { shiftCalendar(-1); });
     document.getElementById('calNext').addEventListener('click', () => { shiftCalendar(1); });
     document.getElementById('calToday').addEventListener('click', () => { calCursor = new Date(); calSelected = new Date(); renderCalendar(); });
@@ -1517,11 +1583,62 @@
             b.classList.toggle('font-semibold', active);
             b.classList.toggle('text-blue-600', active);
         });
-        if (calView === 'month') renderCalMonth();
-        else if (calView === 'week') renderCalWeek();
-        else renderCalQuarter();
+        // active layout button style (only relevant for week/month)
+        document.querySelectorAll('.cal-layout-btn').forEach(b => {
+            const active = b.dataset.layout === calLayout;
+            b.classList.toggle('bg-white', active);
+            b.classList.toggle('dark:bg-slate-600', active);
+            b.classList.toggle('shadow-sm', active);
+            b.classList.toggle('text-blue-600', active);
+        });
+        document.getElementById('calLayoutToggle').style.display = (calView === 'quarter') ? 'none' : '';
+        if (calView === 'quarter') { renderCalQuarter(); }
+        else if (calLayout === 'list') { renderCalList(); }
+        else if (calView === 'month') { renderCalMonth(); }
+        else { renderCalWeek(); }
         renderCalSidePanel();
         lucide.createIcons();
+    }
+
+    // List layout for the current Week or Month period
+    function renderCalList() {
+        let start, end, label;
+        if (calView === 'week') {
+            const base = new Date(calCursor);
+            start = new Date(base.getFullYear(), base.getMonth(), base.getDate() - base.getDay());
+            end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+            label = formatDate(ymd(start)) + '  –  ' + formatDate(ymd(end));
+        } else {
+            const y = calCursor.getFullYear(), m = calCursor.getMonth();
+            start = new Date(y, m, 1); end = new Date(y, m + 1, 0);
+            label = MONTHS_FULL[m] + ' ' + y;
+        }
+        document.getElementById('calPeriodLabel').textContent = label;
+        const items = tasks.filter(t => { const d = parseYMD(t.due); return d && d >= start && d <= end; })
+            .sort((a, b) => parseYMD(a.due) - parseYMD(b.due));
+        if (!items.length) { document.getElementById('calBody').innerHTML = '<div class="text-center text-slate-400 text-sm py-10">No tasks due in this ' + calView + '.</div>'; return; }
+        const todayKey = ymd(new Date());
+        const groups = {};
+        items.forEach(t => { const k = t.due.toString().slice(0, 10); (groups[k] = groups[k] || []).push(t); });
+        let html = '<div class="space-y-3">';
+        Object.keys(groups).sort().forEach(k => {
+            const d = parseYMD(k);
+            const isToday = k === todayKey, isPast = k < todayKey, isSun = d.getDay() === 0;
+            html += '<div class="flex gap-3">' +
+                '<div class="flex-shrink-0 w-28 text-right pt-0.5">' +
+                    '<div class="text-xs font-semibold ' + (isToday ? 'text-blue-600' : isSun ? 'text-red-500' : isPast ? 'text-slate-400' : 'text-slate-600 dark:text-slate-300') + '">' + DAY_NAMES[d.getDay()] + ', ' + formatDate(k) + '</div>' +
+                    (isToday ? '<div class="text-[10px] text-blue-500">Today</div>' : '') +
+                '</div>' +
+                '<div class="flex-1 border-l-2 pl-3 space-y-1.5 ' + (isToday ? 'border-blue-400' : 'border-slate-200 dark:border-slate-700') + '">' +
+                    groups[k].map(t => '<div class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 rounded-lg px-2 py-1.5" onclick="viewTask(\'' + t.id + '\')">' +
+                        '<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:' + priorityDot(t.priority) + '"></span>' +
+                        '<span class="text-xs font-mono text-slate-400 flex-shrink-0">' + escapeHtml(t.id) + '</span>' +
+                        '<span class="text-sm truncate flex-1">' + (escapeHtml(t.name) || 'Untitled') + '</span>' +
+                        '<span class="badge-status ' + statusBadgeClass(t.status) + ' flex-shrink-0">' + escapeHtml(t.status) + '</span></div>').join('') +
+                '</div></div>';
+        });
+        html += '</div>';
+        document.getElementById('calBody').innerHTML = html;
     }
 
     function renderCalMonth() {
@@ -1542,8 +1659,10 @@
             let chips = due.slice(0, 3).map(t => '<span class="cal-chip text-white" style="background:' + priorityDot(t.priority) + '">' + escapeHtml(t.name || 'Task') + '</span>').join('');
             if (due.length > 3) chips += '<span class="cal-chip bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200">+' + (due.length - 3) + ' more</span>';
             const numColor = key === todayKey ? 'text-blue-600' : (isSun ? 'text-red-500' : 'text-slate-500');
+            const hol = holidayName(d);
+            const holHtml = hol ? '<div class="text-[9px] leading-tight text-slate-400 opacity-70 truncate" title="' + escapeHtml(hol) + '">' + escapeHtml(hol) + '</div>' : '';
             html += '<div class="cal-cell ' + (inMonth ? '' : 'is-muted') + ' ' + (key === todayKey ? 'is-today' : '') + ' ' + (key === selKey ? 'is-selected' : '') + '" onclick="selectCalDate(\'' + key + '\')">' +
-                '<div class="text-xs font-semibold ' + numColor + '">' + d.getDate() + '</div>' + chips + '</div>';
+                '<div class="text-xs font-semibold ' + numColor + '">' + d.getDate() + '</div>' + holHtml + chips + '</div>';
         }
         html += '</div>';
         document.getElementById('calBody').innerHTML = html;
@@ -1565,8 +1684,10 @@
             let chips = due.map(t => '<span class="cal-chip text-white" style="background:' + priorityDot(t.priority) + '">' + escapeHtml(t.name || 'Task') + '</span>').join('');
             if (!due.length) chips = '<span class="text-[10px] text-slate-300 dark:text-slate-600">—</span>';
             const numColor = key === todayKey ? 'text-blue-600' : (isSun ? 'text-red-500' : 'text-slate-600');
+            const holW = holidayName(d);
+            const holWHtml = holW ? '<div class="text-[9px] text-center leading-tight text-slate-400 opacity-70 truncate mb-1" title="' + escapeHtml(holW) + '">' + escapeHtml(holW) + '</div>' : '';
             html += '<div class="cal-cell ' + (key === todayKey ? 'is-today' : '') + ' ' + (key === selKey ? 'is-selected' : '') + '" style="min-height:150px" onclick="selectCalDate(\'' + key + '\')">' +
-                '<div class="text-center mb-1"><div class="text-[10px] ' + (isSun ? 'text-red-500' : 'text-slate-400') + '">' + DAY_NAMES[d.getDay()] + '</div><div class="text-sm font-semibold ' + numColor + '">' + d.getDate() + '</div></div>' + chips + '</div>';
+                '<div class="text-center mb-1"><div class="text-[10px] ' + (isSun ? 'text-red-500' : 'text-slate-400') + '">' + DAY_NAMES[d.getDay()] + '</div><div class="text-sm font-semibold ' + numColor + '">' + d.getDate() + '</div></div>' + holWHtml + chips + '</div>';
         }
         html += '</div>';
         document.getElementById('calBody').innerHTML = html;
@@ -1698,15 +1819,30 @@
     };
 
     // ===================== PROFILE =====================
+    function profileTargetName() {
+        if (isAdmin() && profileUser) return profileUser;
+        return currentUser ? (currentUser.name || currentUser.username) : '';
+    }
     function myTasks() {
-        const name = currentUser ? (currentUser.name || currentUser.username) : '';
+        const name = profileTargetName();
         return tasks.filter(t => (t.assignee || '') === name);
     }
     function renderProfile() {
         if (!currentUser) return;
-        document.getElementById('profileName').textContent = currentUser.name || currentUser.username;
-        document.getElementById('profileRole').textContent = currentUser.role === 'admin' ? 'Administrator' : 'User';
-        document.getElementById('profileAvatar').textContent = initials(currentUser.name || currentUser.username);
+        // admin can pick any user; build the picker from the assignee list
+        if (isAdmin()) {
+            const sel = document.getElementById('profileUserSelect');
+            if (sel) {
+                const cur = profileUser || (currentUser.name || currentUser.username);
+                const names = [...new Set([currentUser.name || currentUser.username, ...assigneeNames])].filter(Boolean);
+                sel.innerHTML = names.map(n => '<option value="' + escapeHtml(n) + '"' + (n === cur ? ' selected' : '') + '>' + escapeHtml(n) + '</option>').join('');
+                sel.value = cur;
+            }
+        }
+        const targetName = profileTargetName();
+        document.getElementById('profileName').textContent = targetName || (currentUser.name || currentUser.username);
+        document.getElementById('profileRole').textContent = (isAdmin() && profileUser && profileUser !== (currentUser.name || currentUser.username)) ? 'Team member' : (currentUser.role === 'admin' ? 'Administrator' : 'User');
+        document.getElementById('profileAvatar').textContent = initials(targetName || 'U');
         const mine = myTasks();
         const total = mine.length;
         const completed = mine.filter(t => t.status === 'Completed').length;
@@ -2338,15 +2474,43 @@
         document.getElementById('adminActivityCard').classList.toggle('hidden', !isAdmin());
         document.getElementById('adminPermsCard').classList.toggle('hidden', !isAdmin());
         document.body.classList.toggle('role-user', !isAdmin());
+        // admin-only All/Mine scope toggle
+        const st = document.getElementById('adminScopeToggle');
+        if (st) { st.classList.toggle('hidden', !isAdmin()); st.classList.toggle('flex', isAdmin()); }
+        updateScopeButtons();
+        const pus = document.getElementById('profileUserWrap');
+        if (pus) pus.classList.toggle('hidden', !isAdmin());
         applyPermissions();
+    }
+    function updateScopeButtons() {
+        document.querySelectorAll('.scope-btn').forEach(b => {
+            const active = (b.dataset.scope === 'all') === adminScopeAll;
+            b.classList.toggle('bg-white', active);
+            b.classList.toggle('dark:bg-slate-600', active);
+            b.classList.toggle('shadow-sm', active);
+            b.classList.toggle('font-semibold', active);
+            b.classList.toggle('text-blue-600', active);
+        });
     }
     function applyPermissions() {
         document.body.classList.toggle('no-create', !can('createTask'));
         document.body.classList.toggle('no-edit', !can('editTask'));
         document.body.classList.toggle('no-delete', !can('deleteTask'));
         document.body.classList.toggle('no-managelists', !can('manageLists'));
-        // reflect current perms in the admin toggles
-        document.querySelectorAll('.perm-toggle').forEach(t => { t.checked = !!perms[t.dataset.cap]; });
+    }
+    // ---- Role Permissions panel (admin) ----
+    let permEditRole = 'user';
+    function renderPermsPanel() {
+        document.querySelectorAll('.permrole-btn').forEach(b => {
+            const active = b.dataset.role === permEditRole;
+            b.classList.toggle('bg-white', active);
+            b.classList.toggle('dark:bg-slate-600', active);
+            b.classList.toggle('shadow-sm', active);
+            b.classList.toggle('font-semibold', active);
+            b.classList.toggle('text-blue-600', active);
+        });
+        const p = (allPerms && allPerms[permEditRole]) || {};
+        document.querySelectorAll('.perm-toggle').forEach(t => { t.checked = !!p[t.dataset.cap]; });
     }
     async function doLogin() {
         const username = document.getElementById('loginUsername').value.trim();
@@ -2383,8 +2547,13 @@
             const res = await fetch(GS_BASE_URL + '?action=getConfig' + authParam());
             const data = await res.json();
             if (checkAuth(data)) return;
-            if (data.status === 'success' && data.perms) { perms = data.perms; applyPermissions(); }
-            if (data.status === 'success') { assigneeNames = data.assignees || []; }
+            if (data.status === 'success') {
+                if (data.perms) perms = data.perms;
+                if (data.allPerms) allPerms = data.allPerms;
+                assigneeNames = data.assignees || [];
+                applyPermissions();
+                if (isAdmin()) renderPermsPanel();
+            }
         } catch (e) {}
     }
     function startApp() {
@@ -2394,13 +2563,22 @@
         fetchTasks();
         if (isAdmin()) { renderUsers(); renderActivity(); }
     }
+    // switch which level's permissions are shown
+    document.querySelectorAll('.permrole-btn').forEach(btn => {
+        btn.addEventListener('click', () => { permEditRole = btn.dataset.role; renderPermsPanel(); });
+    });
     // save role permissions (admin)
     document.getElementById('savePermsBtn').addEventListener('click', async () => {
         const next = {};
         document.querySelectorAll('.perm-toggle').forEach(t => { next[t.dataset.cap] = t.checked; });
-        const data = await postAction('setPerms', { perms: next });
-        if (data.status === 'success') { perms = data.perms || next; applyPermissions(); showToast('✅ Permissions saved', 'success'); }
-        else showToast('❌ ' + (data.message || 'Failed'), 'error');
+        const data = await postAction('setPerms', { role: permEditRole, perms: next });
+        if (data.status === 'success') {
+            if (data.allPerms) allPerms = data.allPerms;
+            renderPermsPanel();
+            // if editing my own role, refresh my effective perms
+            if (currentUser && currentUser.role === permEditRole) { perms = next; applyPermissions(); }
+            showToast('✅ ' + permEditRole.charAt(0).toUpperCase() + permEditRole.slice(1) + ' permissions saved', 'success');
+        } else showToast('❌ ' + (data.message || 'Failed'), 'error');
     });
 
     document.getElementById('loginBtn').addEventListener('click', doLogin);
@@ -2432,7 +2610,8 @@
             data.data.map(u => {
                 const badge = u.active ? '<span class="text-green-600">Active</span>' : '<span class="text-slate-400">Disabled</span>';
                 const roleSel = '<select class="usr-role bg-slate-100 dark:bg-slate-700/60 rounded-lg px-2 py-1 text-xs border-0 outline-none" data-u="' + escapeHtml(u.username) + '">' +
-                    '<option value="user"' + (u.role !== 'admin' ? ' selected' : '') + '>User</option>' +
+                    '<option value="user"' + (u.role === 'user' || (!u.role) ? ' selected' : '') + '>User</option>' +
+                    '<option value="manager"' + (u.role === 'manager' ? ' selected' : '') + '>Manager</option>' +
                     '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin</option></select>';
                 return '<tr class="border-b border-slate-100 dark:border-slate-700/40">' +
                     '<td class="py-2 font-medium">' + escapeHtml(u.username) + '</td>' +
