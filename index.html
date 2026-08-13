@@ -111,7 +111,10 @@
             </div>
             <div>
                 <label class="field-label">Password</label>
-                <input id="loginPassword" type="password" autocomplete="current-password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+                <div class="relative">
+                    <input id="loginPassword" type="password" autocomplete="current-password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 pr-11 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+                    <button type="button" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" data-target="loginPassword" title="Show/hide password"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                </div>
             </div>
             <p id="loginError" class="text-sm text-red-500 hidden"></p>
             <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-medium transition">Sign in</button>
@@ -124,8 +127,8 @@
     <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6">
         <h3 class="text-lg font-semibold mb-4">Change password</h3>
         <div class="space-y-3">
-            <div><label class="field-label">Current password</label><input id="cpOld" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 outline-none"></div>
-            <div><label class="field-label">New password</label><input id="cpNew" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 outline-none"></div>
+            <div><label class="field-label">Current password</label><div class="relative"><input id="cpOld" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 pr-11 border-0 outline-none"><button type="button" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" data-target="cpOld"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div>
+            <div><label class="field-label">New password</label><div class="relative"><input id="cpNew" type="password" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 pr-11 border-0 outline-none"><button type="button" class="pw-eye absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" data-target="cpNew"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div>
             <div class="flex gap-2 justify-end pt-1">
                 <button id="cpCancel" class="px-4 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-700">Cancel</button>
                 <button id="cpSave" class="px-4 py-2 rounded-xl text-sm bg-blue-600 hover:bg-blue-700 text-white">Save</button>
@@ -779,7 +782,7 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxEDjzXjJrGIqtWSaD9Gtxu2LV-BqjN2FOe962aSHRJuvNZ_tNsOsY76IzPigpKApDB/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbylDWy9jknh271RpS8OLGrA9n4HqcmPi1SngInMDmV6Q7wFg6gncmxRgSkFGsMKtc-a9A/exec';
     // ===================== AUTH STATE =====================
     let authToken = localStorage.getItem('mf_token') || '';
     let currentUser = null;
@@ -2587,6 +2590,17 @@
     });
 
     document.getElementById('loginBtn').addEventListener('click', doLogin);
+    // show/hide password eye toggles
+    document.addEventListener('click', e => {
+        const eye = e.target.closest && e.target.closest('.pw-eye');
+        if (!eye) return;
+        const inp = document.getElementById(eye.dataset.target);
+        if (!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        const icon = eye.querySelector('i, svg');
+        if (icon) { icon.setAttribute('data-lucide', show ? 'eye-off' : 'eye'); eye.innerHTML = '<i data-lucide="' + (show ? 'eye-off' : 'eye') + '" class="w-4 h-4"></i>'; lucide.createIcons(); }
+    });
     document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
     document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
 
