@@ -779,7 +779,7 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbykWkbSoeD3XRPJVIR6Sg7FoxCidD4K-wUfQXDWPUrIgn4Ls6b_fsUgxF41vHNX4L_GnA/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbwPA5-zjZsT1P0E3PCEUK9tmz_t-q1kpx4NizUDfdymNISk-LIby7YHbbKRtCsSn4tW/exec';
     // ===================== AUTH STATE =====================
     let authToken = localStorage.getItem('mf_token') || '';
     let currentUser = null;
@@ -1600,7 +1600,7 @@
         lucide.createIcons();
     }
 
-    // List layout for the current Week or Month period
+    // List layout: every day of the current Week or Month, Google-agenda style
     function renderCalList() {
         let start, end, label;
         if (calView === 'week') {
@@ -1614,29 +1614,34 @@
             label = MONTHS_FULL[m] + ' ' + y;
         }
         document.getElementById('calPeriodLabel').textContent = label;
-        const items = tasks.filter(t => { const d = parseYMD(t.due); return d && d >= start && d <= end; })
-            .sort((a, b) => parseYMD(a.due) - parseYMD(b.due));
-        if (!items.length) { document.getElementById('calBody').innerHTML = '<div class="text-center text-slate-400 text-sm py-10">No tasks due in this ' + calView + '.</div>'; return; }
         const todayKey = ymd(new Date());
-        const groups = {};
-        items.forEach(t => { const k = t.due.toString().slice(0, 10); (groups[k] = groups[k] || []).push(t); });
-        let html = '<div class="space-y-3">';
-        Object.keys(groups).sort().forEach(k => {
-            const d = parseYMD(k);
-            const isToday = k === todayKey, isPast = k < todayKey, isSun = d.getDay() === 0;
-            html += '<div class="flex gap-3">' +
-                '<div class="flex-shrink-0 w-28 text-right pt-0.5">' +
-                    '<div class="text-xs font-semibold ' + (isToday ? 'text-blue-600' : isSun ? 'text-red-500' : isPast ? 'text-slate-400' : 'text-slate-600 dark:text-slate-300') + '">' + DAY_NAMES[d.getDay()] + ', ' + formatDate(k) + '</div>' +
+        const selKey = ymd(calSelected);
+        let html = '<div class="divide-y divide-slate-100 dark:divide-slate-700/50">';
+        // iterate EVERY day in the range (7 for week, 28–31 for month)
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const cur = new Date(d);
+            const key = ymd(cur);
+            const isToday = key === todayKey, isPast = key < todayKey, isSun = cur.getDay() === 0;
+            const due = tasksDueOn(cur);
+            const hol = holidayName(cur);
+            const dateColor = isToday ? 'text-blue-600' : isSun ? 'text-red-500' : isPast ? 'text-slate-400' : 'text-slate-700 dark:text-slate-200';
+            const tasksHtml = due.length
+                ? due.map(t => '<div class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 rounded-lg px-2 py-1" onclick="viewTask(\'' + t.id + '\')">' +
+                    '<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:' + priorityDot(t.priority) + '"></span>' +
+                    '<span class="text-xs font-mono text-slate-400 flex-shrink-0">' + escapeHtml(t.id) + '</span>' +
+                    '<span class="text-sm truncate flex-1">' + (escapeHtml(t.name) || 'Untitled') + '</span>' +
+                    '<span class="badge-status ' + statusBadgeClass(t.status) + ' flex-shrink-0">' + escapeHtml(t.status) + '</span></div>').join('')
+                : '<div class="text-xs text-slate-300 dark:text-slate-600 px-2 py-1">No tasks</div>';
+            html += '<div class="flex gap-3 py-2 ' + (isToday ? 'bg-blue-50/50 dark:bg-blue-900/10 rounded-lg' : '') + ' cursor-pointer" onclick="selectCalDate(\'' + key + '\')">' +
+                '<div class="flex-shrink-0 w-24 text-right pt-1">' +
+                    '<div class="text-[11px] ' + (isSun ? 'text-red-500' : 'text-slate-400') + '">' + DAY_NAMES[cur.getDay()] + '</div>' +
+                    '<div class="text-sm font-semibold ' + dateColor + '">' + cur.getDate() + ' ' + MONTHS[cur.getMonth()] + '</div>' +
                     (isToday ? '<div class="text-[10px] text-blue-500">Today</div>' : '') +
+                    (hol ? '<div class="text-[9px] text-slate-400 opacity-70 leading-tight">' + escapeHtml(hol) + '</div>' : '') +
                 '</div>' +
-                '<div class="flex-1 border-l-2 pl-3 space-y-1.5 ' + (isToday ? 'border-blue-400' : 'border-slate-200 dark:border-slate-700') + '">' +
-                    groups[k].map(t => '<div class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 rounded-lg px-2 py-1.5" onclick="viewTask(\'' + t.id + '\')">' +
-                        '<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:' + priorityDot(t.priority) + '"></span>' +
-                        '<span class="text-xs font-mono text-slate-400 flex-shrink-0">' + escapeHtml(t.id) + '</span>' +
-                        '<span class="text-sm truncate flex-1">' + (escapeHtml(t.name) || 'Untitled') + '</span>' +
-                        '<span class="badge-status ' + statusBadgeClass(t.status) + ' flex-shrink-0">' + escapeHtml(t.status) + '</span></div>').join('') +
-                '</div></div>';
-        });
+                '<div class="flex-1 border-l-2 pl-3 space-y-0.5 ' + (isToday ? 'border-blue-400' : 'border-slate-200 dark:border-slate-700') + '" onclick="event.stopPropagation()">' + tasksHtml + '</div>' +
+            '</div>';
+        }
         html += '</div>';
         document.getElementById('calBody').innerHTML = html;
     }
