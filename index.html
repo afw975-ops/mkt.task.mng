@@ -401,10 +401,14 @@
 
             <!-- ARCHIVE -->
             <div id="section-archive" class="p-6 md:p-8 hidden">
-                <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200/40 dark:border-slate-700/40 text-center">
-                    <i data-lucide="archive" class="w-16 h-16 mx-auto text-slate-300 dark:text-slate-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">Archive</h3>
-                    <p class="text-slate-500 dark:text-slate-400">Archived tasks will appear here.</p>
+                <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200/40 dark:border-slate-700/40">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i data-lucide="archive" class="w-5 h-5 text-slate-400"></i>
+                        <h3 class="text-xl font-semibold">Archive</h3>
+                        <span id="archiveCount" class="text-xs text-slate-400"></span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Tasks marked <span class="font-medium">Completed</span> or <span class="font-medium">Confirmed</span> are archived here automatically. Restore one to reopen it.</p>
+                    <div id="archiveList" class="overflow-x-auto"></div>
                 </div>
             </div>
 
@@ -614,7 +618,7 @@
                 </div>
                 <div>
                     <label class="field-label">Assigned to</label>
-                    <input type="text" id="taskAssignee" placeholder="Person responsible" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+                    <select id="taskAssignee" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none"></select>
                 </div>
             </div>
             <div>
@@ -737,7 +741,7 @@
             </div>
             <div>
                 <label class="field-label">Assigned to</label>
-                <input type="text" id="editTaskAssignee" placeholder="Person responsible" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none">
+                <select id="editTaskAssignee" class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-xl px-4 py-2.5 border-0 focus:ring-2 focus:ring-blue-400/30 outline-none"></select>
             </div>
             <div>
                 <label class="field-label">Description</label>
@@ -754,11 +758,12 @@
 <script>
     // ===================== CONFIGURATION =====================
     // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
-    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbzNF-vv467e-XnDRjnKXYGbILD_AB85mo8C81jy-zskpjyBHntbBxnq4ShqgHKfGSO5EA/exec';
+    const GS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxIRdsOpcZT9NZuvy2KnBoJAa46Y1Ny_NJsOsJ9_aqJhXpowoVsXCyuflznvOGpjkIXLQ/exec';
     // ===================== AUTH STATE =====================
     let authToken = localStorage.getItem('mf_token') || '';
     let currentUser = null;
     let perms = { createTask: true, editTask: true, deleteTask: false, manageLists: false };
+    let assigneeNames = [];
     try { currentUser = JSON.parse(localStorage.getItem('mf_user') || 'null'); } catch (e) { currentUser = null; }
     function authParam() { return authToken ? '&token=' + encodeURIComponent(authToken) : ''; }
     function isAdmin() { return currentUser && currentUser.role === 'admin'; }
@@ -1244,10 +1249,16 @@
         assigneeSelect.value = currentAssignee;
     }
 
+    const ARCHIVED_STATUSES = ['Completed', 'Confirmed'];
+    function isArchived(t) { return ARCHIVED_STATUSES.indexOf(t.status) !== -1; }
+
     function applyFilters() {
         const query = searchInput.value.toLowerCase().trim();
         const terms = query ? query.split(/\s+/) : [];
         filteredTasks = tasks.filter(t => {
+            // archived tasks live in the Archive view, not the active list
+            // (unless the user explicitly filters by a Completed/Confirmed status)
+            if (isArchived(t) && filterState.status !== t.status) return false;
             if (terms.length) {
                 // every term must appear somewhere in the task (smart AND search)
                 const haystack = [t.id, t.name, t.category, t.brand, t.assignee,
@@ -1634,16 +1645,57 @@
     function renderAll() {
         renderTaskTable(taskTableBody, document.getElementById('taskCountDisplay'), filteredTasks);
         renderTaskTable(taskTableBody2, document.getElementById('taskCountDisplay2'), filteredTasks);
+        const activeTotal = tasks.filter(t => !isArchived(t)).length;
         const sc = document.getElementById('shownCount');
-        if (sc) sc.textContent = filteredTasks.length === tasks.length
-            ? tasks.length + ' task' + (tasks.length === 1 ? '' : 's')
-            : filteredTasks.length + ' of ' + tasks.length + ' shown';
+        if (sc) sc.textContent = filteredTasks.length === activeTotal
+            ? activeTotal + ' task' + (activeTotal === 1 ? '' : 's')
+            : filteredTasks.length + ' of ' + activeTotal + ' shown';
         renderKPI();
         renderCharts();
         renderProfile();
+        renderArchive();
         updateSortIndicators();
         updateBulkBar();
     }
+
+    // ===================== ARCHIVE =====================
+    function renderArchive() {
+        const el = document.getElementById('archiveList');
+        if (!el) return;
+        const query = (searchInput.value || '').toLowerCase().trim();
+        const terms = query ? query.split(/\s+/) : [];
+        let list = tasks.filter(isArchived);
+        if (terms.length) {
+            list = list.filter(t => {
+                const hay = [t.id, t.name, t.category, t.brand, t.assignee, t.status, t.priority].map(v => (v || '').toString().toLowerCase()).join(' ');
+                return terms.every(term => hay.includes(term));
+            });
+        }
+        list.sort((a, b) => (b.createdAt || '').toString().localeCompare((a.createdAt || '').toString()));
+        const cnt = document.getElementById('archiveCount');
+        if (cnt) cnt.textContent = '(' + list.length + ')';
+        if (!list.length) { el.innerHTML = '<p class="text-sm text-slate-400 py-4">No archived tasks.</p>'; return; }
+        el.innerHTML = '<table class="w-full text-sm"><thead><tr class="text-left text-slate-400 text-xs border-b border-slate-200/50 dark:border-slate-700/50">' +
+            '<th class="py-2">Task ID</th><th>Task</th><th>PIC</th><th>Status</th><th>Due</th><th class="text-right">Action</th></tr></thead><tbody>' +
+            list.map(t => '<tr class="border-b border-slate-100 dark:border-slate-700/40 hover:bg-slate-50 dark:hover:bg-slate-700/30">' +
+                '<td class="py-2 font-mono text-xs text-slate-400 cursor-pointer" onclick="viewTask(\'' + t.id + '\')">' + escapeHtml(t.id) + '</td>' +
+                '<td class="cursor-pointer" onclick="viewTask(\'' + t.id + '\')">' + (escapeHtml(t.name) || 'Untitled') + '</td>' +
+                '<td>' + escapeHtml(t.assignee || '') + '</td>' +
+                '<td><span class="badge-status ' + statusBadgeClass(t.status) + '">' + escapeHtml(t.status) + '</span></td>' +
+                '<td class="text-slate-500">' + escapeHtml(formatDate(t.due)) + '</td>' +
+                '<td class="text-right"><button class="cap-edit text-blue-600 hover:underline text-xs" onclick="restoreTask(\'' + t.id + '\')">Restore</button></td>' +
+                '</tr>').join('') + '</tbody></table>';
+    }
+    window.restoreTask = async function(id) {
+        const t = tasks.find(x => x.id == id);
+        if (!t) return;
+        if (!confirm('Restore "' + (t.name || id) + '" back to In Progress?')) return;
+        await updateTask(id, {
+            name: t.name, category: t.category, brand: t.brand, priority: t.priority,
+            status: 'In Progress', due: t.due ? t.due.toString().slice(0, 10) : '',
+            assignee: t.assignee, description: t.description
+        });
+    };
 
     // ===================== PROFILE =====================
     function myTasks() {
@@ -2004,7 +2056,7 @@
         document.getElementById('editTaskPriority').value = task.priority || 'Medium';
         document.getElementById('editTaskStatus').value = task.status || 'Pending';
         document.getElementById('editTaskDue').value = task.due ? task.due.toString().slice(0, 10) : '';
-        document.getElementById('editTaskAssignee').value = task.assignee || '';
+        fillSelect(document.getElementById('editTaskAssignee'), assigneeNames, task.assignee || '', 'Select assignee', false);
         document.getElementById('editTaskDesc').value = task.description || '';
         document.getElementById('editModal').classList.remove('hidden');
     };
@@ -2028,7 +2080,7 @@
     function openCreateModal() {
         refreshCategorySelects('', '');
         updateTaskIdPreview();
-        document.getElementById('taskAssignee').value = currentUser ? (currentUser.name || currentUser.username) : '';
+        fillSelect(document.getElementById('taskAssignee'), assigneeNames, currentUser ? (currentUser.name || currentUser.username) : '', 'Select assignee', false);
         document.getElementById('createModal').classList.remove('hidden');
         document.getElementById('taskDue').value = ymd(new Date());
     }
@@ -2332,6 +2384,7 @@
             const data = await res.json();
             if (checkAuth(data)) return;
             if (data.status === 'success' && data.perms) { perms = data.perms; applyPermissions(); }
+            if (data.status === 'success') { assigneeNames = data.assignees || []; }
         } catch (e) {}
     }
     function startApp() {
