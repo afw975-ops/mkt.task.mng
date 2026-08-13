@@ -51,6 +51,12 @@
         .sidebar-expanded nav span { display: inline; }
         .sidebar-expanded .logo-text { display: inline; }
         .sidebar-expanded .online-text { display: inline; }
+        /* animated collapse chevron */
+        #collapseSidebar svg, #collapseSidebar i { transition: transform .3s ease; }
+        .sidebar-collapsed #collapseSidebar svg, .sidebar-collapsed #collapseSidebar i { transform: rotate(180deg); }
+        /* subtle icon hover animation */
+        nav a svg, nav a i { transition: transform .2s ease; }
+        nav a:hover svg, nav a:hover i { transform: scale(1.18); }
         .field-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #64748B; margin-bottom: 4px; display: block; }
         .dark .field-label { color: #94A3B8; }
         .toast { position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 24px; border-radius: 12px; color: white; font-weight: 500; font-size: 0.9rem; box-shadow: 0 8px 30px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -2159,8 +2165,6 @@
         collapsed = !collapsed;
         sidebar.classList.toggle('sidebar-collapsed');
         sidebar.classList.toggle('sidebar-expanded');
-        collapseBtn.querySelector('i').setAttribute('data-lucide', collapsed ? 'chevron-right' : 'chevron-left');
-        lucide.createIcons();
     });
 
     // ===================== NAVIGATION =====================
